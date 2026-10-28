@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mini App</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  html, body { background: var(--fond); color: var(--texte); font-family: var(--police); }
+  body { padding: calc(20px + env(safe-area-inset-top, 0px)) 16px calc(24px + env(safe-area-inset-bottom, 0px)); max-width: 560px; margin: 0 auto; }
+  header { text-align: center; padding: 8px 0 24px; }
+  .logo { font-size: 56px; line-height: 1; }
+  .logo img { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; }
+  h1 { font-size: 26px; margin-top: 12px; }
+  .desc { margin-top: 8px; opacity: .75; line-height: 1.45; }
+  .carte { background: var(--carte); border-radius: 16px; padding: 14px; margin-bottom: 14px; display: flex; gap: 14px; align-items: center; }
+  .visuel { flex: 0 0 64px; height: 64px; border-radius: 12px; display: grid; place-items: center; font-size: 36px; overflow: hidden; }
+  .visuel img { width: 100%; height: 100%; object-fit: cover; }
+  .infos { flex: 1; min-width: 0; }
+  .infos h2 { font-size: 17px; }
+  .infos p { font-size: 14px; opacity: .75; margin-top: 3px; line-height: 1.35; }
+  .prix { font-weight: 700; margin-top: 6px; color: var(--accent); }
+  button { font: inherit; background: var(--accent); color: var(--texteBouton); border: 0; border-radius: 12px; padding: 10px 14px; font-weight: 600; cursor: pointer; }
+  button:focus-visible { outline: 3px solid var(--texte); outline-offset: 2px; }
+  .contact { width: 100%; margin-top: 10px; padding: 14px; font-size: 16px; }
+  .vide { text-align: center; opacity: .6; padding: 20px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo" id="logo"></div>
+  <h1 id="nom"></h1>
+  <p class="desc" id="description"></p>
+</header>
+<main id="offres"></main>
+<button class="contact" id="contact"></button>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   ✏️  ICI TU ÉCRIS TOUT CE QUE TU VEUX — rien d'autre à toucher
+   Pour les couleurs tu peux écrire en français (blanc, noir,
+   rouge, bleu...) ou en code (#ffffff).
+   ═══════════════════════════════════════════════════════════ */
+const CONFIG = {
+
+  // ── Titre et texte du haut ──
+  nom: "🇮🇹La Camorra Nantaise 🇮🇹",
+  description: "Bienvenue Chez La Camorra Nantaise 🇮🇹! Découvrez notre menu👇",
+  logo: "🛍️",                 // un emoji OU un lien d'image (https://...)
+
+  // ── Couleurs ──
+  couleurs: {
+    fond: "noir",             // fond de la page
+    texte: "blanc",             // couleur du texte
+    carte: "rouge",       // fond de chaque offre
+    accent: "vert",            // boutons et prix
+    texteBouton: "rouge "       // texte dans les boutons
+  },
+
+  // ── Police : Arial, Georgia, Verdana, Trebuchet MS, Courier New... ──
+  police: "Arial",
+
+  // ── Tes offres : copie-colle un bloc { ... }, pour en ajouter ──
+  offres: [
+    {
+      image: "🇸🇷",             // un emoji OU un lien d'image
+      titre: "Surinamienne 🇸🇷",
+      description: "1G Cocaïne Surinamienne ",
+      prix: "50€",
+      bouton: "Ajouter au panier "
+    },
+    {
+      image: "🇨🇴",
+      titre: "Colombienne 🇨🇴",
+      description: "0.5G Cocaïne Colombienne",
+      prix: "40€",
+      bouton: "Ajouter au panier "
+    },
+    {
+      image: "🇨🇴",
+      titre: "Colombienne 🇨🇴",
+      description: "1G Cocaïne Colombienne",
+      prix: "70€",
+      bouton: "Ajouter au panier "
+    }
+
+{
+      image: "🇳🇱",
+      titre: "Crack Hollandais 🇳🇱",
+      description: "0.5G Crack Hollandais",
+      prix: "50€",
+      bouton: "Ajouter au panier "
+    }
+
+{
+      image: "🇳🇱",
+      titre: "Crack Hollandais 🇳🇱",
+      description: "1G Crack Hollandais ",
+      prix: "80€",
+      bouton: "Ajouter au panier "
+    }
+
+  ],
+
+  // ── Contact : ton pseudo Telegram SANS le @ ──
+  contact: { l
+    texte: "Contact Livraison",
+    pseudo: "lacamo44_3",
+    messageCommande: "Salut, je veux : "   // + le nom de l'offre
+  }
+};
+/* ═══════════════════ FIN — ne touche plus en dessous ═══════════════════ */
+
+
+const COULEURS_FR = {
+  blanc: "#ffffff", noir: "#000000", rouge: "#e53935", bleu: "#1e88e5", vert: "#43a047",
+  jaune: "#fdd835", orange: "#fb8c00", rose: "#ec407a", violet: "#8e24aa", gris: "#9e9e9e",
+  "gris clair": "#f1f1f1", "gris fonce": "#333333", "gris foncé": "#333333", marron: "#6d4c41",
+  or: "#d4af37", doré: "#d4af37", dore: "#d4af37", turquoise: "#1abc9c",
+  "bleu marine": "#0d2b52", "bleu clair": "#81d4fa", "vert clair": "#a5d6a7", "rouge fonce": "#a31515",
+  beige: "#f5ecd7", transparent: "transparent"
+};
+const col = c => COULEURS_FR[String(c).trim().toLowerCase()] || c;
+
+const tg = window.Telegram && window.Telegram.WebApp;
+const root = document.documentElement.style;
+const C = CONFIG.couleurs;
+root.setProperty("--fond", col(C.fond));
+root.setProperty("--texte", col(C.texte));
+root.setProperty("--carte", col(C.carte));
+root.setProperty("--accent", col(C.accent));
+root.setProperty("--texteBouton", col(C.texteBouton));
+root.setProperty("--police", `"${CONFIG.police}", system-ui, sans-serif`);
+
+if (tg) {
+  tg.ready();
+  tg.expand();
+  try { tg.setHeaderColor(col(C.fond)); tg.setBackgroundColor(col(C.fond)); } catch (e) {}
+}
+
+function visuel(v, cible) {
+  if (/^https?:\/\//.test(v)) {
+    const img = document.createElement("img");
+    img.src = v; img.alt = "";
+    cible.appendChild(img);
+  } else {
+    cible.textContent = v || "";
+  }
+}
+
+function ouvrirChat(message) {
+  const url = `https://t.me/${CONFIG.contact.pseudo}` + (message ? `?text=${encodeURIComponent(message)}` : "");
+  if (tg && tg.openTelegramLink) tg.openTelegramLink(url);
+  else window.open(url, "_blank");
+}
+
+document.title = CONFIG.nom;
+document.getElementById("nom").textContent = CONFIG.nom;
+document.getElementById("description").textContent = CONFIG.description;
+visuel(CONFIG.logo, document.getElementById("logo"));
+
+const liste = document.getElementById("offres");
+if (!CONFIG.offres.length) {
+  liste.innerHTML = '<p class="vide">Bientôt de nouvelles offres.</p>';
+}
+CONFIG.offres.forEach(o => {
+  const carte = document.createElement("article");
+  carte.className = "carte";
+
+  const v = document.createElement("div");
+  v.className = "visuel";
+  visuel(o.image, v);
+
+  const infos = document.createElement("div");
+  infos.className = "infos";
+  const h = document.createElement("h2"); h.textContent = o.titre;
+  const p = document.createElement("p"); p.textContent = o.description;
+  const prix = document.createElement("div"); prix.className = "prix"; prix.textContent = o.prix;
+  infos.append(h, p, prix);
+
+  const b = document.createElement("button");
+  b.textContent = o.bouton || "Commander";
+  b.onclick = () => ouvrirChat(CONFIG.contact.messageCommande + o.titre);
+
+  carte.append(v, infos, b);
+  liste.appendChild(carte);
+});
+
+const bc = document.getElementById("contact");
+bc.textContent = CONFIG.contact.texte;
+bc.onclick = () => ouvrirChat("");
+</script>
+</body>
+</html>
